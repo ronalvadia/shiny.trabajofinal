@@ -822,7 +822,7 @@ shinyApp(
     
     output$downloadData <- downloadHandler(
       filename = function() {
-        paste("FC_ENTEL_MIGRACIONES", ".csv", sep = "")
+        paste("FC_BASE_CARGA", ".csv", sep = "")
       },
       content = function(file) {
         write.csv(datasetInput7(), file, row.names = FALSE)
