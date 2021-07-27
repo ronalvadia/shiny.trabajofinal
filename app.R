@@ -111,9 +111,15 @@ shinyApp(
                           fileInput("file2", "Seleccionar el archivo de efectividad:",
                                     multiple = TRUE),
                           # Horizontal line ----
-                          tags$hr()
+                          tags$hr(),
 
-                        # Horizontal line ----
+                          #######################################################
+                          #             BOTÓN PARA CARGAR A AWS                 #
+                          #######################################################
+                          actionButton(inputId = "ejecutar01", label = "Cargar a AWS"),
+                        
+                          # Horizontal line ----
+                          tags$hr()
                           
                         ),
                         #fin de sidebarPanel
@@ -304,6 +310,43 @@ shinyApp(
   #########################################################################################################################################################
   
   server <- function(input, output) {
+    
+    ############################################################
+    #               CARGANDO LA BASE AL TEMPORAL               #
+    ############################################################     
+    
+    observeEvent(input$ejecutar01,{
+      
+      ############################################
+      #          SUBIENDO DATA A AWS             #
+      ############################################
+      
+      library("DBI")
+      library("RMySQL")
+      
+      withProgress(message = 'Subiendo a AWS', value = 0, {
+        
+        for (i in 1:1) {
+          if(i==1) {
+            ############################################################       
+            #                  RECALCULANDO VARIABLES                  #
+            ############################################################  
+            db2 <- dbConnect(RMySQL::MySQL(),
+                             dbname = "movil",
+                             host = "database-movil.catjbiapkswk.us-east-1.rds.amazonaws.com",
+                             user = "user_movil",
+                             password = rstudioapi::askForPassword("Database password"),
+                             Port = 3306)
+            dbExecute(db2, "TRUNCATE TABLE OUTBOUND_MIGRACION")
+            dbWriteTable(conn = db2,"OUTBOUND_MIGRACION", value = datos2, append = TRUE, row.names = FALSE)
+            
+            incProgress(1/1, detail = paste("parte ", i))
+            
+            Sys.sleep(0.1)
+          }
+        }
+      })
+    })
     
     ##################################################
     #               GUARDANDO ARCHIVO                #
